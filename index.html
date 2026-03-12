@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Oficina Agrícola Lite</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <!-- Sidebar Navigation -->
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <span class="logo-icon">🌾</span>
+      <h1 class="logo-text">Oficina Agrícola</h1>
+      <span class="logo-badge">Lite</span>
+    </div>
+    <ul class="nav-menu">
+      <li class="nav-item active" data-page="dashboard">
+        <span class="nav-icon">📊</span>
+        <span class="nav-label">Dashboard</span>
+      </li>
+      <li class="nav-item" data-page="ordens">
+        <span class="nav-icon">🔧</span>
+        <span class="nav-label">Ordens de Serviço</span>
+      </li>
+      <li class="nav-item" data-page="clientes">
+        <span class="nav-icon">👨‍🌾</span>
+        <span class="nav-label">Clientes</span>
+      </li>
+      <li class="nav-item" data-page="equipamentos">
+        <span class="nav-icon">🚜</span>
+        <span class="nav-label">Equipamentos</span>
+      </li>
+      <li class="nav-item" data-page="pecas">
+        <span class="nav-icon">⚙️</span>
+        <span class="nav-label">Peças / Estoque</span>
+      </li>
+    </ul>
+    <div class="sidebar-footer">
+      <span class="version">v1.0.0</span>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="main-content" id="main-content">
+    <!-- Top bar -->
+    <header class="topbar">
+      <button class="menu-toggle" id="menu-toggle" aria-label="Alternar menu">☰</button>
+      <h2 class="page-title" id="page-title">Dashboard</h2>
+      <div class="topbar-actions">
+        <span class="current-date" id="current-date"></span>
+      </div>
+    </header>
+
+    <!-- Page: Dashboard -->
+    <section class="page active" id="page-dashboard">
+      <div class="stats-grid">
+        <div class="stat-card stat-blue">
+          <div class="stat-icon">🔧</div>
+          <div class="stat-info">
+            <span class="stat-value" id="stat-ordens">0</span>
+            <span class="stat-label">Ordens Abertas</span>
+          </div>
+        </div>
+        <div class="stat-card stat-green">
+          <div class="stat-icon">👨‍🌾</div>
+          <div class="stat-info">
+            <span class="stat-value" id="stat-clientes">0</span>
+            <span class="stat-label">Clientes</span>
+          </div>
+        </div>
+        <div class="stat-card stat-orange">
+          <div class="stat-icon">🚜</div>
+          <div class="stat-info">
+            <span class="stat-value" id="stat-equipamentos">0</span>
+            <span class="stat-label">Equipamentos</span>
+          </div>
+        </div>
+        <div class="stat-card stat-red">
+          <div class="stat-icon">⚙️</div>
+          <div class="stat-info">
+            <span class="stat-value" id="stat-pecas">0</span>
+            <span class="stat-label">Itens em Estoque</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="dashboard-panels">
+        <div class="panel">
+          <div class="panel-header">
+            <h3>Últimas Ordens de Serviço</h3>
+            <button class="btn btn-sm btn-primary" data-nav="ordens">Ver todas</button>
+          </div>
+          <div class="panel-body">
+            <table class="table" id="dashboard-ordens-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Cliente</th>
+                  <th>Equipamento</th>
+                  <th>Status</th>
+                  <th>Data</th>
+                </tr>
+              </thead>
+              <tbody id="dashboard-ordens-body">
+                <tr><td colspan="5" class="empty-message">Nenhuma ordem de serviço registrada.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <h3>Estoque Baixo</h3>
+            <button class="btn btn-sm btn-primary" data-nav="pecas">Ver estoque</button>
+          </div>
+          <div class="panel-body">
+            <table class="table" id="dashboard-estoque-table">
+              <thead>
+                <tr>
+                  <th>Peça</th>
+                  <th>Código</th>
+                  <th>Qtd</th>
+                  <th>Mín.</th>
+                </tr>
+              </thead>
+              <tbody id="dashboard-estoque-body">
+                <tr><td colspan="4" class="empty-message">Nenhum item com estoque baixo.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Page: Ordens de Serviço -->
+    <section class="page" id="page-ordens">
+      <div class="page-actions">
+        <button class="btn btn-primary" id="btn-nova-ordem">+ Nova Ordem</button>
+      </div>
+      <div class="panel">
+        <div class="panel-header">
+          <h3>Ordens de Serviço</h3>
+          <input type="search" class="search-input" id="search-ordens" placeholder="Pesquisar ordens..." />
+        </div>
+        <div class="panel-body">
+          <table class="table" id="ordens-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Cliente</th>
+                <th>Equipamento</th>
+                <th>Descrição</th>
+                <th>Status</th>
+                <th>Data Abertura</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="ordens-body">
+              <tr><td colspan="7" class="empty-message">Nenhuma ordem de serviço registrada.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Page: Clientes -->
+    <section class="page" id="page-clientes">
+      <div class="page-actions">
+        <button class="btn btn-primary" id="btn-novo-cliente">+ Novo Cliente</button>
+      </div>
+      <div class="panel">
+        <div class="panel-header">
+          <h3>Clientes</h3>
+          <input type="search" class="search-input" id="search-clientes" placeholder="Pesquisar clientes..." />
+        </div>
+        <div class="panel-body">
+          <table class="table" id="clientes-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Nome</th>
+                <th>Telefone</th>
+                <th>E-mail</th>
+                <th>Cidade</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="clientes-body">
+              <tr><td colspan="6" class="empty-message">Nenhum cliente cadastrado.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Page: Equipamentos -->
+    <section class="page" id="page-equipamentos">
+      <div class="page-actions">
+        <button class="btn btn-primary" id="btn-novo-equipamento">+ Novo Equipamento</button>
+      </div>
+      <div class="panel">
+        <div class="panel-header">
+          <h3>Equipamentos</h3>
+          <input type="search" class="search-input" id="search-equipamentos" placeholder="Pesquisar equipamentos..." />
+        </div>
+        <div class="panel-body">
+          <table class="table" id="equipamentos-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Descrição</th>
+                <th>Marca / Modelo</th>
+                <th>Número de Série</th>
+                <th>Cliente</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="equipamentos-body">
+              <tr><td colspan="6" class="empty-message">Nenhum equipamento cadastrado.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Page: Peças / Estoque -->
+    <section class="page" id="page-pecas">
+      <div class="page-actions">
+        <button class="btn btn-primary" id="btn-nova-peca">+ Nova Peça</button>
+      </div>
+      <div class="panel">
+        <div class="panel-header">
+          <h3>Peças / Estoque</h3>
+          <input type="search" class="search-input" id="search-pecas" placeholder="Pesquisar peças..." />
+        </div>
+        <div class="panel-body">
+          <table class="table" id="pecas-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Descrição</th>
+                <th>Código</th>
+                <th>Qtd. Atual</th>
+                <th>Qtd. Mínima</th>
+                <th>Preço Unit. (R$)</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="pecas-body">
+              <tr><td colspan="7" class="empty-message">Nenhuma peça cadastrada.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Modal -->
+  <div class="modal-overlay" id="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal" id="modal">
+      <div class="modal-header">
+        <h3 id="modal-title">Modal</h3>
+        <button class="modal-close" id="modal-close" aria-label="Fechar">&times;</button>
+      </div>
+      <div class="modal-body" id="modal-body"></div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="modal-cancel">Cancelar</button>
+        <button class="btn btn-primary" id="modal-save">Salvar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirm Dialog -->
+  <div class="modal-overlay" id="confirm-overlay" role="dialog" aria-modal="true" aria-labelledby="confirm-title">
+    <div class="modal modal-sm">
+      <div class="modal-header">
+        <h3 id="confirm-title">Confirmar exclusão</h3>
+      </div>
+      <div class="modal-body">
+        <p id="confirm-message">Deseja realmente excluir este registro?</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="confirm-cancel">Cancelar</button>
+        <button class="btn btn-danger" id="confirm-ok">Excluir</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast-container" id="toast-container" aria-live="polite"></div>
+
+  <script src="js/storage.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/clientes.js"></script>
+  <script src="js/equipamentos.js"></script>
+  <script src="js/pecas.js"></script>
+  <script src="js/ordens.js"></script>
+  <script src="js/dashboard.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
