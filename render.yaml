@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: oficina-agricola-lite-api
+    runtime: node
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm run start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: APP_URL
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: GOOGLE_REDIRECT_URI
+        sync: false
+      - key: DRIVE_BACKUP_KEEP_LATEST
+        value: 3
+      - key: DRIVE_BACKUP_FOLDER_NAME
+        value: Oficina Agricola Lite Backups

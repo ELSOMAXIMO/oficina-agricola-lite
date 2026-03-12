@@ -1,0 +1,5 @@
+{
+  "name": "Oficina Agrícola Pro",
+  "description": "Sistema de gestão completo para oficinas de máquinas e equipamentos agrícolas, com controle de ordens de serviço, clientes e frota.",
+  "requestFramePermissions": ["camera"]
+}
