@@ -1,0 +1,5 @@
+package com.oficinaagricola.pro;
+
+import com.getcapacitor.BridgeActivity;
+
+public class MainActivity extends BridgeActivity {}

@@ -1,0 +1,210 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: clientes
+    // Fields: nome, email, telefone, cpf_cnpj, endereco, createdAt, uid
+    //
+    // Collection: veiculos
+    // Fields: clienteId, modelo, marca, ano, placa_serie, tipo, uid
+    //
+    // Collection: pecas
+    // Fields: codigo, descricao, marca, precoCusto, precoVenda, estoque, estoqueMinimo, unidade, uid
+    //
+    // Collection: ordens_servico
+    // Fields: numero, clienteId, veiculoId, status, descricao, valorTotal, dataAbertura, dataFinalizacao, uid
+    //
+    // Collection: system_config
+    // Fields: initialized, updatedAt
+    //
+    // ===============================================================
+
+    // Helper Functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isDocOwner() {
+      return isAuthenticated() && request.auth.uid == resource.data.uid;
+    }
+
+    function uidUnchanged() {
+      return !('uid' in request.resource.data) || request.resource.data.uid == request.auth.uid;
+    }
+
+    function isValidEmail(email) {
+      return email is string && email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+    }
+
+    function hasOnlyAllowedFields(fields) {
+      return request.resource.data.keys().hasOnly(fields);
+    }
+
+    // Domain Validators
+    function isValidCliente(data) {
+      return data.nome is string && data.nome.size() > 0 && data.nome.size() < 200 &&
+             (!('email' in data) || data.email == "" || isValidEmail(data.email)) &&
+             (!('telefone' in data) || data.telefone is string) &&
+             data.cpf_cnpj is string && data.cpf_cnpj.size() > 0 &&
+             data.logradouro is string && data.logradouro.size() > 0 &&
+             data.numero is string && data.numero.size() > 0 &&
+             data.bairro is string && data.bairro.size() > 0 &&
+             data.cep is string && data.cep.size() > 0 &&
+             data.cidade is string && data.cidade.size() > 0 &&
+             data.uf is string && data.uf.size() == 2 &&
+             data.uid == request.auth.uid;
+    }
+
+    function isValidVeiculo(data) {
+      return data.modelo is string && data.modelo.size() > 0 &&
+             data.marca is string && data.marca.size() > 0 &&
+             data.ano is int &&
+             data.tipo in ['Trator', 'Colheitadeira', 'Pulverizador', 'Outros'] &&
+             data.uid == request.auth.uid;
+    }
+
+    function isValidOS(data) {
+      return data.numero is string && data.numero.size() > 0 &&
+             data.status in ['Aberta', 'Em Andamento', 'Aguardando Peças', 'Finalizada', 'Cancelada'] &&
+             data.tecnicoResponsavel is string && data.tecnicoResponsavel.size() > 0 &&
+             data.descricao is string && data.descricao.size() > 0 &&
+             (!('fotos' in data) || data.fotos is list) &&
+             (!('quilometragemInicial' in data) || data.quilometragemInicial is string) &&
+             (!('quilometragemFinal' in data) || data.quilometragemFinal is string) &&
+             (!('observacoes' in data) || data.observacoes is string) &&
+             data.valorTotal is number &&
+             data.uid == request.auth.uid;
+    }
+
+    function isValidOrcamento(data) {
+      return data.numero is string && data.numero.size() > 0 &&
+             data.status in ['Pendente', 'Aprovado', 'Recusado', 'Vencido'] &&
+             data.tecnicoResponsavel is string && data.tecnicoResponsavel.size() > 0 &&
+             data.descricao is string && data.descricao.size() > 0 &&
+             (!('fotos' in data) || data.fotos is list) &&
+             (!('quilometragemInicial' in data) || data.quilometragemInicial is string) &&
+             (!('quilometragemFinal' in data) || data.quilometragemFinal is string) &&
+             (!('observacoes' in data) || data.observacoes is string) &&
+             data.valorTotal is number &&
+             data.validade is string &&
+             data.uid == request.auth.uid;
+    }
+
+    function isValidConfig(data) {
+      return data.nomeOficina is string && data.nomeOficina.size() > 0 &&
+             (!('cnpj' in data) || data.cnpj is string) &&
+             (!('inscricaoMunicipal' in data) || data.inscricaoMunicipal is string) &&
+             (!('inscricaoEstadual' in data) || data.inscricaoEstadual is string) &&
+             (!('endereco' in data) || data.endereco is string) &&
+             (!('complemento' in data) || data.complemento is string) &&
+             (!('cidade' in data) || data.cidade is string) &&
+             (!('uf' in data) || data.uf is string) &&
+             (!('telefone' in data) || data.telefone is string) &&
+             (!('email' in data) || data.email is string) &&
+             (!('logo' in data) || data.logo is string) &&
+             data.uid == request.auth.uid;
+    }
+
+    function isValidAgendamento(data) {
+      return data.clienteId is string &&
+             data.data is timestamp &&
+             data.descricao is string && data.descricao.size() > 0 &&
+             (!('local' in data) || data.local is string) &&
+             data.uid == request.auth.uid;
+    }
+
+    function isValidPeca(data) {
+      return data.codigo is string && data.codigo.size() > 0 &&
+             data.descricao is string && data.descricao.size() > 0 &&
+             (!('marca' in data) || data.marca is string) &&
+             (!('precoCusto' in data) || data.precoCusto is number) &&
+             data.precoVenda is number &&
+             data.estoque is number &&
+             (!('estoqueMinimo' in data) || data.estoqueMinimo is number) &&
+             data.unidade is string &&
+             data.uid == request.auth.uid;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+        (get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.role == 'adm' ||
+          (request.auth.token.email == "elsomaximo@gmail.com" && request.auth.token.email_verified == true));
+    }
+
+    function isValidUser(data) {
+      return data.nome is string && data.nome.size() > 0 &&
+             data.email is string && isValidEmail(data.email) &&
+             data.role in ['adm', 'tecnico'] &&
+             (!('uid' in data) || data.uid is string);
+    }
+
+    // Rules
+    match /system_config/initialization {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+
+    match /usuarios/{userId} {
+      allow read: if isAuthenticated() && (request.auth.uid == userId || isAdmin());
+      allow create: if isAuthenticated() && isValidUser(request.resource.data) && (request.auth.uid == userId || isAdmin());
+      allow update: if isAuthenticated() && (request.auth.uid == userId || isAdmin()) && isValidUser(request.resource.data);
+      allow delete: if isAdmin();
+    }
+
+    match /clientes/{clienteId} {
+      allow read: if isAuthenticated() && resource.data.uid == request.auth.uid;
+      allow create: if isAuthenticated() && isValidCliente(request.resource.data);
+      allow update: if isAuthenticated() && isDocOwner() && isValidCliente(request.resource.data);
+      allow delete: if isAuthenticated() && isDocOwner();
+    }
+
+    match /veiculos/{veiculoId} {
+      allow read: if isAuthenticated() && resource.data.uid == request.auth.uid;
+      allow create: if isAuthenticated() && isValidVeiculo(request.resource.data);
+      allow update: if isAuthenticated() && isDocOwner() && isValidVeiculo(request.resource.data);
+      allow delete: if isAuthenticated() && isDocOwner();
+    }
+
+    match /pecas/{pecaId} {
+      allow read: if isAuthenticated() && resource.data.uid == request.auth.uid;
+      allow create: if isAuthenticated() && isValidPeca(request.resource.data);
+      allow update: if isAuthenticated() && isDocOwner() && isValidPeca(request.resource.data);
+      allow delete: if isAuthenticated() && isDocOwner();
+    }
+
+    match /ordens_servico/{osId} {
+      allow read: if isAuthenticated() && resource.data.uid == request.auth.uid;
+      allow create: if isAuthenticated() && isValidOS(request.resource.data);
+      allow update: if isAuthenticated() && isDocOwner() && isValidOS(request.resource.data);
+      allow delete: if isAuthenticated() && isDocOwner();
+    }
+
+    match /orcamentos/{orcamentoId} {
+      allow read: if isAuthenticated() && resource.data.uid == request.auth.uid;
+      allow create: if isAuthenticated() && isValidOrcamento(request.resource.data);
+      allow update: if isAuthenticated() && isDocOwner() && isValidOrcamento(request.resource.data);
+      allow delete: if isAuthenticated() && isDocOwner();
+    }
+
+    match /configuracoes/{configId} {
+      allow read: if isAuthenticated() && (resource == null || resource.data.uid == request.auth.uid);
+      allow create: if isAuthenticated() && isValidConfig(request.resource.data);
+      allow update: if isAuthenticated() && isDocOwner() && isValidConfig(request.resource.data);
+      allow delete: if isAuthenticated() && isDocOwner();
+    }
+
+    match /agendamentos/{agendamentoId} {
+      allow read: if isAuthenticated() && resource.data.uid == request.auth.uid;
+      allow create: if isAuthenticated() && isValidAgendamento(request.resource.data);
+      allow update: if isAuthenticated() && isDocOwner() && isValidAgendamento(request.resource.data);
+      allow delete: if isAuthenticated() && isDocOwner();
+    }
+  }
+}

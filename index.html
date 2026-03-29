@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Oficina Pro" />
+    <link rel="apple-touch-icon" href="/icon-192.svg" />
+    <title>Oficina Agrícola Pro</title>
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#059669" />
+    <meta name="description" content="Sistema de gestão completo para oficinas de máquinas e equipamentos agrícolas." />
+  </head>
+  <body>
+    <div id="root">
+      <div style="height: 100vh; display: flex; align-items: center; justify-content: center; font-family: sans-serif; color: #64748b;">
+        <div style="text-align: center;">
+          <div style="width: 40px; height: 40px; border: 3px solid #f1f5f9; border-top-color: #10b981; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 16px;"></div>
+          <p>Carregando sistema...</p>
+        </div>
+      </div>
+      <style>
+        @keyframes spin { to { transform: rotate(360deg); } }
+      </style>
+    </div>
+    <script type="module" src="/src/main.tsx"></script>
+    <script>
+      window.__APP_BOOTSTRAPPED__ = false;
+      window.setTimeout(async () => {
+        if (window.__APP_BOOTSTRAPPED__) return;
+
+        const recoveryKey = 'oficina-app-bootstrap-recovery';
+        if (sessionStorage.getItem(recoveryKey) === '1') {
+          console.error('[BOOT] React bootstrap did not complete after cache recovery.');
+          return;
+        }
+
+        sessionStorage.setItem(recoveryKey, '1');
+
+        try {
+          if ('serviceWorker' in navigator) {
+            const registrations = await navigator.serviceWorker.getRegistrations();
+            await Promise.all(registrations.map(registration => registration.unregister()));
+          }
+
+          if ('caches' in window) {
+            const cacheKeys = await caches.keys();
+            await Promise.all(cacheKeys.map(cacheKey => caches.delete(cacheKey)));
+          }
+        } catch (error) {
+          console.error('[BOOT] Cache recovery failed:', error);
+        }
+
+        window.location.reload();
+      }, 5000);
+    </script>
+    <script>
+      console.log("[INDEX] Script starting...");
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          const isLocalhost = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+
+          if (isLocalhost) {
+            navigator.serviceWorker.getRegistrations().then(registrations => {
+              registrations.forEach(registration => registration.unregister());
+            });
+            return;
+          }
+
+          navigator.serviceWorker.register('/sw.js').catch(err => {
+            console.error('[SW] Registration failed:', err);
+          });
+        });
+      }
+    </script>
+  </body>
+</html>
+

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" role="img" aria-label="Oficina Agricola Pro">
+  <rect width="192" height="192" rx="40" fill="#0f172a"/>
+  <rect x="18" y="18" width="156" height="156" rx="32" fill="#059669"/>
+  <path d="M54 106h22l12-28h35l15 28h18l-19-37c-4-8-12-13-21-13H92c-9 0-17 5-21 13l-17 37Zm12 22c-8 0-14 6-14 14s6 14 14 14 14-6 14-14-6-14-14-14Zm60 0c-8 0-14 6-14 14s6 14 14 14 14-6 14-14-6-14-14-14Z" fill="#ecfeff"/>
+  <circle cx="74" cy="142" r="7" fill="#0f172a"/>
+  <circle cx="126" cy="142" r="7" fill="#0f172a"/>
+</svg>
